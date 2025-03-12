@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Personal Finance Manager</title>
+    <!-- Include jsPDF and autoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      /* General Styles */
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      div {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: space-evenly;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        background-color: #3498db;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      .Balance {
+        font-size: 24px;
+        font-weight: bold;
+        color: #27ae60;
+        margin: 10px 0;
+      }
+
+      form {
+        display: flex;
+        flex-direction: row; /* Align children horizontally */
+        align-items: center; /* Vertically center align items */
+        gap: 10px; /* Add spacing between form elements */
+        width: 100%;
+        max-width: 800px; /* Adjust as needed */
+        margin: 10px 0;
+      }
+
+      input, select {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.3s ease;
+        flex: 1; /* Allow inputs to grow and fill available space */
+      }
+
+      input[type="submit"] {
+        background-color: #27ae60;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        flex: none; /* Prevent the submit button from growing */
+        width: auto; /* Let the button size adjust to its content */
+      }
+
+      input:focus, select:focus {
+        border-color: #3498db;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #3498db;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      .delete-btn {
+        background-color: #e74c3c;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        border: none;
+        font-size: 12px;
+        transition: background-color 0.3s ease;
+      }
+
+      .delete-btn:hover {
+        background-color: #c0392b;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Admin Dashboard - Personal Finance Manager</h1>
+      <button onclick="log()">Logout</button>
+      <h1 class="Balance">Balance: 0.00</h1>
+      <form id="transactionForm">
+        <input type="text" placeholder="Description" name="Description" required />
+        <input type="number" placeholder="Amount" name="amount" required />
+        <select name="Income" id="income">
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <input type="submit" value="Transaction" />
+      </form>
+      <h1>Transactions</h1>
+      <table id="transactionTable">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <button onclick="exportToPDF()">Export PDF</button>
+    </div>
+
+    <script>
+      var balanceElement = document.querySelector(".Balance");
+      var form = document.getElementById("transactionForm");
+      var tableBody = document.querySelector("#transactionTable tbody");
+      var Income = 0, Expense = 0;
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var description = document.querySelector("[name='Description']").value;
+        var amount = parseFloat(document.querySelector("[name='amount']").value);
+        var type = document.querySelector("[name='Income']").value;
+        
+        var data={id:Date.now(),description,amount,type};
+        localStorage.setItem(data.id,JSON.stringify(data));
+
+        if (type === "income") {
+          Income += amount;
+        } else {
+          Expense += amount;
+        }
+        updateBalance();
+
+        var row = tableBody.insertRow();
+        row.innerHTML = `<td>${description}</td>
+                         <td>${amount.toFixed(2)}</td>
+                         <td>${type}</td>
+                         <td><button class="delete-btn" onclick="deleteRow(this,${Date.now()}, ${amount}, '${type}')">Delete</button></td>`;
+
+        form.reset();
+      });
+
+      function updateBalance() {
+        balanceElement.innerHTML = `Balance: ${(Income - Expense).toFixed(2)}`;
+      }
+
+      function deleteRow(button, id, amount, type) {
+        localStorage.removeItem(id);
+        
+        var row = button.parentNode.parentNode;
+        row.remove();
+        if (type === "income") {
+          Income -= amount;
+        } else {
+          Expense -= amount;
+        }
+        updateBalance();
+      }
+
+      function log() {
+        setTimeout(() => {
+            alert("Logged out successfully");
+          window.location.href = "index.html";
+        }, 1000);
+      }
+
+      function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Title
+        doc.text("Transaction Report", 10, 10);
+
+        // Table Data
+        let rows = [];
+        document.querySelectorAll("#transactionTable tbody tr").forEach(row => {
+          let cols = Array.from(row.children).map(td => td.innerText);
+          cols.pop(); // Remove "Delete" button column
+          rows.push(cols);
+        });
+
+        // Use autoTable to create the table
+        doc.autoTable({
+          head: [["Description", "Amount", "Type"]],
+          body: rows,
+          startY: 20
+        });
+
+        doc.save("Transactions.pdf");
+      }
+    </script>
+  </body>
+</html>

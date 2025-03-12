@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        /* General Styles */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Login Container */
+        div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+
+        h1 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Input Fields */
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #6a11cb;
+        }
+
+        /* Button */
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: #6a11cb;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background: #2575fc;
+        }
+
+        /* Placeholder Styling */
+        input::placeholder {
+            color: #999;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 400px) {
+            div {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Login</h1>
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="password" id="password" placeholder="Enter your password">
+        <button onclick="login()">Login</button>
+    </div>
+    <script>
+        function login() {
+            let name = document.getElementById('name').value;
+            let password = document.getElementById('password').value;
+
+            if (name === '' || password === '') {
+                alert('Please enter your name and password');
+                return;
+            }
+
+            if (name === 'admin' && password === 'admin') {
+                alert('Login successful');
+                window.location.href = './admin.html';
+            } else if (name === 'user' && password === 'user') {
+                alert('Login successful');
+                window.location.href = './user.html';
+            } else {
+                alert('Login failed');
+            }
+        }
+    </script>
+</body>
+</html>

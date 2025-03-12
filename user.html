@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        div {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0 0 20px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .balance {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .balance.positive {
+            color: #28a745;
+        }
+
+        .balance.negative {
+            color: #dc3545;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .no-transactions {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>User Dashboard</h1>
+        <button onclick="log()">Logout</button>
+        <p>Welcome to your personal finance overview.</p>
+        <h1>Your Current Balance:</h1>
+        <h1 class="balance" id="balance">Balance: 0.00</h1>
+        <h1>Recent Transactions</h1>
+        <table id="transactionTable">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Transactions will be added here dynamically -->
+            </tbody>
+        </table>
+        <p id="noTransactions" class="no-transactions">No transactions yet</p>
+    </div>
+
+    <script>
+        // Function to load transactions and balance from localStorage
+        function loadTransactions() {
+            const tableBody = document.querySelector("#transactionTable tbody");
+            const noTransactions = document.getElementById("noTransactions");
+            const balanceElement = document.getElementById("balance");
+
+            let income = 0, expense = 0;
+            let hasTransactions = false;
+
+            // Clear existing rows
+            tableBody.innerHTML = "";
+
+            // Loop through localStorage to retrieve transactions
+            Object.keys(localStorage).forEach(key => {
+                const transaction = JSON.parse(localStorage.getItem(key));
+                if (transaction) {
+                    hasTransactions = true;
+
+                    // Add transaction to the table
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${transaction.description}</td>
+                        <td>${transaction.amount.toFixed(2)}</td>
+                        <td>${transaction.type}</td>
+                    `;
+
+                    // Update income and expense totals
+                    if (transaction.type === "income") income += transaction.amount;
+                    else expense += transaction.amount;
+                }
+            });
+
+            // Update balance
+            const balance = income - expense;
+            balanceElement.textContent = `Balance: ${balance.toFixed(2)}`;
+            balanceElement.className = balance >= 0 ? "balance positive" : "balance negative";
+
+            // Show/hide "No transactions" message
+            noTransactions.style.display = hasTransactions ? "none" : "block";
+        }
+
+        // Function to handle logout
+        function log() {
+            alert("You have been logged out!");
+            window.location.href = "index.html";
+        }
+
+        // Load transactions when the page loads
+        window.addEventListener("load", loadTransactions);
+    </script>
+</body>
+</html>
