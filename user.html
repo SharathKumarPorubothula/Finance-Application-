@@ -124,21 +124,25 @@
 
             // Loop through localStorage to retrieve transactions
             Object.keys(localStorage).forEach(key => {
-                const transaction = JSON.parse(localStorage.getItem(key));
-                if (transaction) {
-                    hasTransactions = true;
+                try {
+                    const transaction = JSON.parse(localStorage.getItem(key));
+                    if (transaction && transaction.description && transaction.amount && transaction.type) {
+                        hasTransactions = true;
 
-                    // Add transaction to the table
-                    const row = tableBody.insertRow();
-                    row.innerHTML = `
-                        <td>${transaction.description}</td>
-                        <td>${transaction.amount.toFixed(2)}</td>
-                        <td>${transaction.type}</td>
-                    `;
+                        // Add transaction to the table
+                        const row = tableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${transaction.description}</td>
+                            <td>${transaction.amount.toFixed(2)}</td>
+                            <td>${transaction.type}</td>
+                        `;
 
-                    // Update income and expense totals
-                    if (transaction.type === "income") income += transaction.amount;
-                    else expense += transaction.amount;
+                        // Update income and expense totals
+                        if (transaction.type === "income") income += transaction.amount;
+                        else expense += transaction.amount;
+                    }
+                } catch (e) {
+                    console.error("Error parsing transaction:", e);
                 }
             });
 
